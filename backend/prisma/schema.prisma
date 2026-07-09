@@ -1,0 +1,450 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MANAGER
+  EXECUTIVE
+  LEADERSHIP
+}
+
+enum FlowStatus {
+  ALIGNED
+  PARTIAL
+  MISALIGNED
+  NO_EVIDENCE
+}
+
+enum MonitoringMode {
+  ALWAYS_ON
+  BUDGET_CONSCIOUS
+}
+
+model Company {
+  id              String   @id @default(cuid())
+  name            String
+  declaredStrategy String?
+  currentMode     String?
+  monitoringMode  MonitoringMode @default(BUDGET_CONSCIOUS)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users           User[]
+  departments     Department[]
+  meetings        Meeting[]
+  decisions       Decision[]
+  okrs            OKR[]
+  internalDemands InternalDemand[]
+  attentionTopics AttentionTopic[]
+  externalSignals ExternalSignal[]
+  influenceSources InfluenceSource[]
+  insights        Insight[]
+  attentionScores AttentionScore[]
+  flowNodes       DecisionFlowNode[]
+  flowEdges       DecisionFlowEdge[]
+  simulations     Simulation[]
+  scenarios       Scenario[]
+  permissionPolicies PermissionPolicy[]
+  auditLogs       AuditLog[]
+  memorySnapshots MemorySnapshot[]
+  semanticCache   SemanticCacheEntry[]
+  marketWatches   CompanyMarketWatch[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole @default(MANAGER)
+  departmentId String?
+  companyId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  department    Department?    @relation(fields: [departmentId], references: [id])
+  simulations   Simulation[]
+  auditLogs     AuditLog[]
+  conversations Conversation[]
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  title     String?
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String
+  content        String       @db.Text
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+}
+
+model Department {
+  id        String @id @default(cuid())
+  name      String
+  companyId String
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users   User[]
+
+  @@unique([companyId, name])
+}
+
+model Meeting {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime @default(now())
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transcript Transcript?
+  decisions  Decision[]
+}
+
+model Transcript {
+  id         String   @id @default(cuid())
+  meetingId  String   @unique
+  content    String   @db.Text
+  analysis   Json?
+  analyzedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+}
+
+model Decision {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String?
+  owner       String?
+  companyId   String
+  meetingId   String?
+  createdAt   DateTime @default(now())
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  meeting Meeting? @relation(fields: [meetingId], references: [id])
+}
+
+model OKR {
+  id          String   @id @default(cuid())
+  objective   String
+  keyResults  Json?
+  department  String?
+  quarter     String?
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model InternalDemand {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  department  String?
+  urgency     String?
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model AttentionTopic {
+  id          String   @id @default(cuid())
+  topic       String
+  attention   Float    @default(0)
+  budget      Float    @default(0)
+  execution   Float    @default(0)
+  externalImportance Float @default(0)
+  diagnosis   String?
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model ExternalSignal {
+  id          String   @id @default(cuid())
+  title       String
+  sector      String
+  impactScore Float
+  affectedAreas Json?
+  source      String?
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model InfluenceSource {
+  id                String   @id @default(cuid())
+  source            String
+  location          String?
+  coordinates       Json?
+  topic             String?
+  sector            String?
+  influenceScore    Float    @default(0)
+  mentionedInMeetings Int    @default(0)
+  relatedDecisions  Json?
+  companyId         String
+  createdAt         DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Insight {
+  id          String   @id @default(cuid())
+  type        String
+  title       String
+  body        String   @db.Text
+  evidence    Json?
+  confidence  Float?
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model AttentionScore {
+  id          String   @id @default(cuid())
+  metric      String
+  value       Float
+  period      String?
+  metadata    Json?
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model DecisionFlowNode {
+  id       String     @id @default(cuid())
+  nodeId   String
+  label    String
+  detail   String?
+  layer    String
+  status   FlowStatus @default(NO_EVIDENCE)
+  companyId String
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, nodeId])
+}
+
+model DecisionFlowEdge {
+  id       String @id @default(cuid())
+  sourceId String
+  targetId String
+  companyId String
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Simulation {
+  id             String   @id @default(cuid())
+  prompt         String   @db.Text
+  result         Json?
+  confidenceScore Float?
+  companyId      String
+  userId         String
+  createdAt      DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model Scenario {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  parameters  Json?
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model PermissionPolicy {
+  id          String   @id @default(cuid())
+  role        UserRole
+  capabilities Json
+  companyId   String
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  resource  String?
+  metadata  Json?
+  companyId String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+}
+
+model MemorySnapshot {
+  id        String   @id @default(cuid())
+  summary   String   @db.Text
+  topics    Json?
+  tokenEstimate Int  @default(0)
+  companyId String
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model SemanticCacheEntry {
+  id          String   @id @default(cuid())
+  cacheKey    String
+  inputHash   String
+  output      Json
+  tokenSaved  Int      @default(0)
+  companyId   String
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, cacheKey])
+}
+
+model Role {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+}
+
+// ---------------------------------------------------------------------------
+// Market Map — Economic Digital Twin heat layers
+// ---------------------------------------------------------------------------
+
+model Market {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  category    String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  regions     MarketRegion[]
+  metrics     MarketMetric[]
+  signals     MarketSignal[]
+  heatPoints  MarketHeatPoint[]
+  sources     MarketSource[]
+  watches     CompanyMarketWatch[]
+}
+
+model MarketRegion {
+  id        String @id @default(cuid())
+  marketId  String
+  country   String
+  region    String?
+  latitude  Float
+  longitude Float
+  heatScore Float  @default(0)
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+}
+
+model MarketHeatPoint {
+  id            String @id @default(cuid())
+  marketId      String
+  country       String
+  region        String?
+  latitude      Float
+  longitude     Float
+  heatScore     Float
+  drivers       Json?
+  risks         Json?
+  opportunities Json?
+  signals       Json?
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+}
+
+model MarketMetric {
+  id          String   @id @default(cuid())
+  marketId    String
+  metricName  String
+  metricValue String
+  unit        String?
+  source      String?
+  updatedAt   DateTime @default(now())
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+}
+
+model MarketSignal {
+  id                  String   @id @default(cuid())
+  marketId            String
+  title               String
+  sector              String
+  impactScore         Float
+  summary             String?  @db.Text
+  affectedRegions     Json?
+  affectedDepartments Json?
+  source              String?
+  timestamp           DateTime @default(now())
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+}
+
+model MarketSource {
+  id        String  @id @default(cuid())
+  marketId  String
+  name      String
+  type      String
+  url       String?
+  active    Boolean @default(true)
+
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+}
+
+model CompanyMarketWatch {
+  id        String         @id @default(cuid())
+  companyId String
+  marketId  String
+  watchMode MonitoringMode @default(BUDGET_CONSCIOUS)
+  priority  Int            @default(0)
+  createdAt DateTime       @default(now())
+
+  company  Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  market   Market               @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  schedule MarketWatchSchedule[]
+
+  @@unique([companyId, marketId])
+}
+
+model MarketWatchSchedule {
+  id                   String   @id @default(cuid())
+  companyMarketWatchId String
+  dayOfWeek            String
+  frequency            String?
+  nextRunAt            DateTime?
+
+  watch CompanyMarketWatch @relation(fields: [companyMarketWatchId], references: [id], onDelete: Cascade)
+}

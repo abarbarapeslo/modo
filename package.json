@@ -1,33 +1,29 @@
 {
-  "name": "modu-application",
+  "name": "modo-application",
   "version": "1.0.0",
-  "description": "Modu Economic AI Agentic",
-  "homepage": "https://github.com/abarbarapeslo/modu-application#readme",
-  "bugs": {
-    "url": "https://github.com/abarbarapeslo/modu-application/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/abarbarapeslo/modu-application.git"
-  },
+  "private": true,
+  "description": "MODO — Cognitive Digital Twin Platform",
   "license": "MIT",
-  "author": "",
-  "main": "index.js",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.19.0",
-    "next": "^16.2.10"
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "dev": "docker compose up -d && concurrently -n backend,frontend -c blue,green \"npm run dev -w @modo/backend\" \"npm run dev -w @modo/frontend\"",
+    "dev:backend": "npm run dev -w @modo/backend",
+    "dev:frontend": "npm run dev -w @modo/frontend",
+    "build": "npm run db:generate && npm run build -w @modo/frontend",
+    "install:all": "npm install",
+    "db:generate": "npm run db:generate -w @modo/backend",
+    "db:push": "npm run db:push -w @modo/backend",
+    "db:migrate": "npm run db:migrate -w @modo/backend",
+    "db:seed": "npm run db:seed -w @modo/backend",
+    "db:studio": "npm exec -w @modo/backend prisma studio"
   },
   "devDependencies": {
-    "prisma": "^6.19.0"
+    "concurrently": "^9.0.1",
+    "dotenv-cli": "^8.0.0"
   }
 }

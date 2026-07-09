@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-feature-settings: "ss01", "cv05";
+  }
+  ::selection {
+    @apply bg-attention text-ink;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-card;
+  }
+  .kicker {
+    @apply text-[11px] font-medium uppercase tracking-wider2 text-ink-mute;
+  }
+  .metric-serif {
+    @apply font-serif font-light tracking-tight;
+  }
+}
