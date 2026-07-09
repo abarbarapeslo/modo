@@ -1,8 +1,14 @@
 /agents
 /skills
-/node_modules
-/.next
+node_modules/
+**/node_modules/
+dist/
+frontend/dist/
+backend/dist/
+.vite/
+**/.vite/
 .env
 .env.local
 .env.*.local
 backend/.env
+.next/
