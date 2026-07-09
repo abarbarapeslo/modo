@@ -10,6 +10,7 @@ import {
   type Market,
   type WatchMode,
 } from "../data/marketMapMockData";
+import { PageHero } from "../components/dashboard/platform/PlatformLayout";
 
 interface DashboardContext {
   openReimagine: (prompt?: string) => void;
@@ -50,32 +51,22 @@ export default function MarketMapPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="mb-3 flex items-center gap-3">
-            <p className="kicker">Economic Digital Twin</p>
-            <span className="rounded-full bg-attention px-2.5 py-0.5 text-[10px] font-medium">
-              Market Map
-            </span>
-          </div>
-          <h1 className="font-serif text-4xl font-light tracking-tight">Market Map</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">
-            Veja onde cada mercado está aquecido no mundo — e compare esses sinais com a
-            atenção da sua empresa. Cada mercado ativa uma camada diferente do Economic
-            Digital Twin da MODO.
-          </p>
-        </div>
-
-        {market && (
-          <button
-            onClick={() => handleAskModo()}
-            className="rounded-full bg-ink px-5 py-2.5 text-xs font-semibold text-paper transition-opacity hover:opacity-85"
-          >
-            Ask MODO about this market
-          </button>
-        )}
-      </header>
+    <div className="space-y-6">
+      <PageHero
+        kicker="Economic Digital Twin · Market Map"
+        title="Market Map"
+        description="Veja onde cada mercado está aquecido no mundo — e compare esses sinais com a atenção da sua empresa."
+        action={
+          market ? (
+            <button
+              onClick={() => handleAskModo()}
+              className="shrink-0 rounded-md bg-ink px-5 py-2.5 text-xs font-semibold text-paper transition-opacity hover:opacity-85"
+            >
+              Ask MODO
+            </button>
+          ) : undefined
+        }
+      />
 
       <div className="flex flex-col gap-6 xl:flex-row">
         <div className="flex min-w-0 flex-1 flex-col gap-6">

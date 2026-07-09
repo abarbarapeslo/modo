@@ -25,4 +25,15 @@
   .metric-serif {
     @apply font-serif font-light tracking-tight;
   }
+
+  .modo-map .mapboxgl-ctrl-group button {
+    @apply border-line;
+  }
+  .modo-map .mapboxgl-ctrl-attrib {
+    @apply text-[10px];
+  }
+
+  .platform-panel {
+    @apply overflow-hidden rounded-xl border border-line bg-white shadow-card;
+  }
 }

@@ -1,56 +1,73 @@
+import { Link, useLocation } from "react-router-dom";
 import { useUser, type Role, ROLE_LABELS } from "../../context/UserContext";
 import { overviewMetrics } from "../../data/mockData";
 
 const ROLES: Role[] = ["MANAGER", "EXECUTIVE", "LEADERSHIP"];
 
+const ROUTE_LABELS: Record<string, string> = {
+  "/dashboard": "Overview",
+  "/dashboard/attention": "Attention",
+  "/dashboard/alignment": "Alignment",
+  "/dashboard/influence": "Influence",
+  "/dashboard/market-map": "Market Map",
+  "/dashboard/drift": "Drift",
+  "/dashboard/reports": "Reports",
+  "/dashboard/settings": "Settings",
+};
+
 export default function Header({ onReimagine }: { onReimagine: () => void }) {
   const { user, setRole } = useUser();
+  const { pathname } = useLocation();
+  const pageLabel = ROUTE_LABELS[pathname] ?? "Platform";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-line bg-paper/85 px-8 backdrop-blur-md">
-      <div className="flex items-center gap-5">
-        <div>
-          <p className="text-sm font-semibold leading-tight">{user.company}</p>
-          <p className="text-[11px] text-ink-mute">Cognitive Digital Twin</p>
+    <header className="sticky top-0 z-30 border-b border-line bg-paper/95 backdrop-blur-md">
+      <div className="flex h-12 items-center justify-between gap-4 px-6 lg:px-10">
+        {/* breadcrumb */}
+        <div className="flex min-w-0 items-center gap-2 text-[13px]">
+          <Link to="/dashboard" className="shrink-0 font-medium text-ink-soft hover:text-ink">
+            {user.company}
+          </Link>
+          <span className="text-ink-mute/50">/</span>
+          <span className="truncate text-ink-mute">Cognitive Twin</span>
+          <span className="hidden text-ink-mute/50 sm:inline">/</span>
+          <span className="hidden truncate font-medium text-ink sm:inline">{pageLabel}</span>
         </div>
-        <span className="hidden items-center gap-2 rounded-full bg-attention px-3.5 py-1.5 text-xs font-medium md:flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-attention-strong" />
-          Current Mode: {overviewMetrics.currentMode}
-        </span>
-      </div>
 
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onReimagine}
-          className="rounded-full bg-ink px-5 py-2 text-xs font-semibold text-paper transition-opacity hover:opacity-85"
-        >
-          ✦ Reimagine
-        </button>
+        {/* live mode — center on md+ */}
+        <div className="hidden items-center gap-2 md:flex">
+          <span className="flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-medium text-ink-soft">
+            <span className="h-1.5 w-1.5 rounded-full bg-attention-strong" />
+            {overviewMetrics.currentMode}
+          </span>
+        </div>
 
-        {/* permission indicator + role switcher (demo) */}
-        <label className="flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-align-ink" title="Permissões ativas" />
-          <select
-            value={user.role}
-            onChange={(e) => setRole(e.target.value as Role)}
-            className="cursor-pointer bg-transparent text-xs font-medium text-ink-soft focus:outline-none"
-            title="Camada de permissão (demo)"
+        {/* actions */}
+        <div className="flex shrink-0 items-center gap-2 lg:gap-3">
+          <button
+            onClick={onReimagine}
+            className="rounded-md bg-ink px-4 py-1.5 text-[11px] font-semibold text-paper transition-opacity hover:opacity-85"
           >
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {ROLE_LABELS[r]}
-              </option>
-            ))}
-          </select>
-        </label>
+            Reimagine
+          </button>
 
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-mist font-serif text-sm">
+          <label className="hidden items-center gap-1.5 rounded-md border border-line bg-white px-2.5 py-1.5 sm:flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-align-ink" />
+            <select
+              value={user.role}
+              onChange={(e) => setRole(e.target.value as Role)}
+              className="max-w-[100px] cursor-pointer bg-transparent text-[11px] font-medium text-ink-soft focus:outline-none lg:max-w-none"
+            >
+              {ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {ROLE_LABELS[r]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-mist font-serif text-xs lg:h-8 lg:w-8 lg:text-sm">
             {user.name[0]}
-          </div>
-          <div className="hidden text-right md:block">
-            <p className="text-xs font-medium leading-tight">{user.name}</p>
-            <p className="text-[10px] text-ink-mute">{user.department}</p>
           </div>
         </div>
       </div>

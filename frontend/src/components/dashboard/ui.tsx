@@ -14,19 +14,19 @@ export function SectionCard({
   className?: string;
 }) {
   return (
-    <section className={`card p-6 ${className}`}>
-      <header className="mb-5 flex items-start justify-between gap-4">
+    <section className={`overflow-hidden rounded-xl border border-line bg-white shadow-card ${className}`}>
+      <header className="flex items-start justify-between gap-4 border-b border-line bg-surface/40 px-6 py-4">
         <div>
-          <p className="kicker mb-1">{kicker}</p>
-          <h3 className="font-serif text-xl font-medium tracking-tight">{title}</h3>
+          <p className="kicker mb-0.5">{kicker}</p>
+          <h3 className="font-serif text-lg font-medium tracking-tight">{title}</h3>
         </div>
         {metric && (
-          <span className="rounded-full bg-surface px-3 py-1 text-[11px] font-medium text-ink-soft">
+          <span className="shrink-0 rounded-md border border-line bg-white px-2.5 py-1 text-[10px] font-medium text-ink-soft">
             {metric}
           </span>
         )}
       </header>
-      {children}
+      <div className="p-6">{children}</div>
     </section>
   );
 }

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { WorldMap, project } from "./WorldMap";
+import InteractiveWorldMap from "../maps/InteractiveWorldMap";
 import { SectionCard, StatBadge, influenceColor } from "./ui";
 import { attentionSources, type AttentionSource } from "../../data/mockData";
 
@@ -13,6 +13,31 @@ export default function AttentionMap() {
     attentionSources[0]
   );
 
+  const mapPoints = useMemo(
+    () =>
+      attentionSources.map((s) => ({
+        id: s.source,
+        coordinates: s.coordinates,
+        score: s.influenceScore,
+        color: influenceColor(s.influenceScore),
+      })),
+    []
+  );
+
+  const legend = (
+    <div className="flex flex-wrap items-center gap-4 text-[10px] text-ink-mute">
+      <span className="flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full bg-info-ink opacity-70" /> baixa influência
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full bg-attention-strong opacity-80" /> moderada
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full bg-gap-ink opacity-80" /> crítica
+      </span>
+    </div>
+  );
+
   return (
     <SectionCard
       kicker="Attention Map"
@@ -20,45 +45,16 @@ export default function AttentionMap() {
       metric={`${attentionSources.length} fontes ativas`}
     >
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <div className="relative rounded-xl border border-line bg-white p-2">
-          <WorldMap>
-            {attentionSources.map((s) => {
-              const [x, y] = project(s.coordinates);
-              const r = 4 + (s.influenceScore / 100) * 8;
-              const color = influenceColor(s.influenceScore);
-              const active = selected?.source === s.source;
-              return (
-                <g
-                  key={s.source}
-                  onClick={() => setSelected(s)}
-                  className="cursor-pointer"
-                >
-                  <circle cx={x} cy={y} r={r * 2.2} fill={color} opacity={0.16} filter="url(#soft-halo)" />
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={r}
-                    fill={color}
-                    opacity={active ? 0.95 : 0.6}
-                    stroke={active ? "#1E1D1A" : "white"}
-                    strokeWidth={active ? 1.5 : 1}
-                  />
-                </g>
-              );
-            })}
-          </WorldMap>
-          <div className="flex items-center gap-4 px-3 pb-2 pt-1 text-[10px] text-ink-mute">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-info-ink opacity-70" /> baixa influência
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-attention-strong opacity-80" /> moderada
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-gap-ink opacity-80" /> crítica
-            </span>
-          </div>
-        </div>
+        <InteractiveWorldMap
+          points={mapPoints}
+          selectedId={selected?.source ?? null}
+          onSelect={(id) => {
+            const source = attentionSources.find((s) => s.source === id);
+            if (source) setSelected(source);
+          }}
+          minHeight={380}
+          footer={legend}
+        />
 
         <AnimatePresence mode="wait">
           {selected && (

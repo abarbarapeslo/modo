@@ -113,8 +113,11 @@ export const attentionSources: AttentionSource[] = [
 // -- 3. Influence Map (external events) --------------------------------------
 
 export interface ExternalEvent {
+  id: string;
   title: string;
   sector: string;
+  location: string;
+  coordinates: [number, number]; // [lon, lat]
   impactScore: number;
   affectedAreas: string[];
   suggestedDiscussion: string;
@@ -122,43 +125,61 @@ export interface ExternalEvent {
 
 export const externalEvents: ExternalEvent[] = [
   {
+    id: "rare-earth-china",
     title: "Rare earth export controls expand in China",
     sector: "Rare Earths",
+    location: "Beijing, China",
+    coordinates: [116.4074, 39.9042],
     impactScore: 91,
     affectedAreas: ["Procurement", "Finance", "Product"],
     suggestedDiscussion: "Next supply chain meeting",
   },
   {
+    id: "semiconductor-q3",
     title: "Semiconductor supply tightness expected in Q3",
     sector: "Semiconductors",
+    location: "Hsinchu, Taiwan",
+    coordinates: [120.9675, 24.8138],
     impactScore: 89,
     affectedAreas: ["Product", "Operations"],
     suggestedDiscussion: "Procurement planning",
   },
   {
+    id: "interest-rates",
     title: "Global interest rate volatility increases",
     sector: "Finance",
+    location: "Washington D.C., USA",
+    coordinates: [-77.0369, 38.9072],
     impactScore: 74,
     affectedAreas: ["Finance", "Sales"],
     suggestedDiscussion: "Pricing strategy review",
   },
   {
+    id: "consumer-midrange",
     title: "Consumer demand shifts toward mid-range devices",
     sector: "Retail",
+    location: "New York, USA",
+    coordinates: [-74.006, 40.7128],
     impactScore: 66,
     affectedAreas: ["Marketing", "Product", "Sales"],
     suggestedDiscussion: "Quarterly portfolio review",
   },
   {
+    id: "energy-manufacturing",
     title: "Energy cost pressure on manufacturing hubs",
     sector: "Energy",
+    location: "Ruhr, Germany",
+    coordinates: [7.0115, 51.4556],
     impactScore: 58,
     affectedAreas: ["Operations", "Finance"],
     suggestedDiscussion: "Operations cost committee",
   },
   {
+    id: "asian-freight",
     title: "Asian freight lanes face congestion through August",
     sector: "Logistics",
+    location: "Singapore",
+    coordinates: [103.8198, 1.3521],
     impactScore: 52,
     affectedAreas: ["Operations", "Procurement"],
     suggestedDiscussion: "Logistics weekly",

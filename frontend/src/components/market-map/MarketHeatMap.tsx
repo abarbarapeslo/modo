@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { WorldMap, project } from "../dashboard/WorldMap";
-import MarketLegend, { heatColor, heatRadius } from "./MarketLegend";
+import { useState, useMemo } from "react";
+import InteractiveWorldMap from "../maps/InteractiveWorldMap";
+import MarketLegend, { heatColor } from "./MarketLegend";
 import MarketRegionTooltip from "./MarketRegionTooltip";
 import type { Market, MarketHeatPoint } from "../../data/marketMapMockData";
 
@@ -15,7 +14,21 @@ export default function MarketHeatMap({
   const [selected, setSelected] = useState<MarketHeatPoint | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
 
-  const activePoint = selected ?? (hovered ? market?.heatPoints.find((p) => p.id === hovered) ?? null : null);
+  const activePoint =
+    selected ??
+    (hovered ? market?.heatPoints.find((p) => p.id === hovered) ?? null : null);
+
+  const mapPoints = useMemo(
+    () =>
+      (market?.heatPoints ?? []).map((p) => ({
+        id: p.id,
+        coordinates: p.coordinates,
+        score: p.heatScore,
+        color: heatColor(p.heatScore),
+        visible: !!market,
+      })),
+    [market]
+  );
 
   return (
     <div className="relative flex flex-1 flex-col rounded-2xl border border-line bg-white p-4 shadow-card">
@@ -40,9 +53,9 @@ export default function MarketHeatMap({
         <MarketLegend />
       </div>
 
-      <div className={`relative min-h-[340px] flex-1 transition-opacity ${loading ? "opacity-40" : ""}`}>
+      <div className="relative min-h-[380px] flex-1">
         {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/60">
             <span className="flex items-center gap-2 text-xs text-ink-mute">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-attention-strong" />
               Ativando heat layer…
@@ -50,54 +63,31 @@ export default function MarketHeatMap({
           </div>
         )}
 
-        <WorldMap>
-          {market?.heatPoints.map((p) => {
-            const [x, y] = project(p.coordinates);
-            const r = heatRadius(p.heatScore);
-            const color = heatColor(p.heatScore);
-            const active = activePoint?.id === p.id;
-            return (
-              <g
-                key={p.id}
-                className="cursor-pointer"
-                onClick={() => setSelected(p)}
-                onMouseEnter={() => setHovered(p.id)}
-                onMouseLeave={() => setHovered(null)}
-              >
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={r * 2.5}
-                  fill={color}
-                  opacity={market ? 0.18 : 0}
-                  filter="url(#soft-halo)"
-                />
-                <motion.circle
-                  cx={x}
-                  cy={y}
-                  r={r}
-                  fill={color}
-                  initial={false}
-                  animate={{ opacity: market ? (active ? 0.95 : 0.65) : 0 }}
-                  transition={{ duration: 0.4 }}
-                  stroke={active ? "#1E1D1A" : "white"}
-                  strokeWidth={active ? 1.5 : 1}
-                />
-              </g>
-            );
-          })}
-        </WorldMap>
+        <InteractiveWorldMap
+          points={mapPoints}
+          selectedId={activePoint?.id ?? null}
+          onSelect={(id) => {
+            const point = market?.heatPoints.find((p) => p.id === id);
+            if (point) setSelected(point);
+          }}
+          onHover={setHovered}
+          minHeight={380}
+          fitToMarkers={!!market}
+          dimmed={loading}
+          overlay={
+            !market && !loading ? (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-paper/30">
+                <p className="max-w-xs rounded-xl border border-line bg-white/90 px-5 py-4 text-center text-sm text-ink-mute shadow-card backdrop-blur-sm">
+                  O mapa está neutro. Escolha um mercado no painel lateral para ver onde o mundo
+                  está aquecido.
+                </p>
+              </div>
+            ) : undefined
+          }
+        />
 
-        {!market && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <p className="max-w-xs text-center text-sm text-ink-mute">
-              O mapa está neutro. Escolha um mercado no painel lateral para ver onde o mundo está aquecido.
-            </p>
-          </div>
-        )}
+        <MarketRegionTooltip point={activePoint} onClose={() => setSelected(null)} />
       </div>
-
-      <MarketRegionTooltip point={activePoint} onClose={() => setSelected(null)} />
     </div>
   );
 }

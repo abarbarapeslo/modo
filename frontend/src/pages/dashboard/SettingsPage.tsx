@@ -1,4 +1,5 @@
 import { useUser, ROLE_LABELS } from "../../context/UserContext";
+import { PageHero } from "../../components/dashboard/platform/PlatformLayout";
 
 const integrations = [
   "Google Meet / Zoom transcripts",
@@ -14,16 +15,21 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">
-      <header>
-        <p className="kicker mb-3">Settings</p>
-        <h1 className="font-serif text-4xl font-light tracking-tight">
-          Governança e <span className="italic">controle</span>
-        </h1>
-      </header>
+      <PageHero
+        kicker="Platform · Governance"
+        title={
+          <>
+            Governança e <span className="italic">controle</span>
+          </>
+        }
+        description="Integrações, políticas de dados e permissões por camada organizacional."
+      />
 
-      <section className="card p-6">
-        <p className="kicker mb-4">Organização</p>
-        <dl className="grid gap-4 sm:grid-cols-2">
+      <section className="overflow-hidden rounded-xl border border-line bg-white shadow-card">
+        <div className="border-b border-line bg-surface/40 px-6 py-4">
+          <p className="kicker">Organização</p>
+        </div>
+        <dl className="grid gap-4 p-6 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-ink-mute">Empresa</dt>
             <dd className="font-medium">{user.company}</dd>
@@ -37,9 +43,11 @@ export default function SettingsPage() {
 
       {can("view:admin") && (
         <>
-          <section className="card p-6">
-            <p className="kicker mb-4">Integrações empresariais</p>
-            <ul className="space-y-2">
+          <section className="overflow-hidden rounded-xl border border-line bg-white shadow-card">
+            <div className="border-b border-line bg-surface/40 px-6 py-4">
+              <p className="kicker">Integrações empresariais</p>
+            </div>
+            <ul className="space-y-0 p-4">
               {integrations.map((i) => (
                 <li
                   key={i}
@@ -54,9 +62,11 @@ export default function SettingsPage() {
             </ul>
           </section>
 
-          <section className="card p-6">
-            <p className="kicker mb-4">Políticas</p>
-            <div className="space-y-3 text-sm text-ink-soft">
+          <section className="overflow-hidden rounded-xl border border-line bg-white shadow-card">
+            <div className="border-b border-line bg-surface/40 px-6 py-4">
+              <p className="kicker">Políticas</p>
+            </div>
+            <div className="space-y-3 p-6 text-sm text-ink-soft">
               <p>Retenção de dados: 24 meses</p>
               <p>Anonimização em reuniões: parcial</p>
               <p>Auditoria de acesso: ativa</p>
