@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import FitMapBounds from "./FitMapBounds";
 import MapMarkerPin from "./MapMarkerPin";
 import MissingApiKeyFallback from "./MissingApiKeyFallback";
+import { useMapboxToken } from "../../hooks/useMapboxToken";
 import { toLatLng, type LonLat } from "./mapUtils";
 
 export type MapPoint = {
@@ -28,10 +29,10 @@ type InteractiveWorldMapProps = {
   footer?: ReactNode;
 };
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? "";
 const MAP_STYLE = "mapbox://styles/mapbox/light-v11";
 
 function MapCanvas({
+  token,
   points,
   selectedId,
   onSelect,
@@ -42,7 +43,7 @@ function MapCanvas({
   overlay,
   footer,
   expanded = false,
-}: InteractiveWorldMapProps & { expanded?: boolean }) {
+}: InteractiveWorldMapProps & { token: string; expanded?: boolean }) {
   const visiblePoints = useMemo(
     () => points.filter((p) => p.visible !== false),
     [points]
@@ -63,7 +64,7 @@ function MapCanvas({
       style={{ minHeight: height, height }}
     >
       <Map
-        mapboxAccessToken={MAPBOX_TOKEN}
+        mapboxAccessToken={token}
         initialViewState={{ longitude: 0, latitude: 20, zoom: 1.4 }}
         style={{ width: "100%", height: "100%" }}
         mapStyle={MAP_STYLE}
@@ -116,19 +117,34 @@ function MapCanvas({
   );
 }
 
-/** Mapa interativo Mapbox — zoom, arraste e ampliar. Tier gratuito: 50k loads/mês. */
+/** Mapa interativo Mapbox — token obtido do backend em runtime. */
 export default function InteractiveWorldMap(props: InteractiveWorldMapProps) {
+  const { token, loading } = useMapboxToken();
   const [expanded, setExpanded] = useState(false);
   const closeExpanded = useCallback(() => setExpanded(false), []);
 
-  if (!MAPBOX_TOKEN) {
+  if (loading) {
+    return (
+      <div
+        className="flex items-center justify-center rounded-xl border border-line bg-surface"
+        style={{ minHeight: props.minHeight ?? 340 }}
+      >
+        <span className="flex items-center gap-2 text-xs text-ink-mute">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-attention-strong" />
+          Carregando mapa…
+        </span>
+      </div>
+    );
+  }
+
+  if (!token) {
     return <MissingApiKeyFallback minHeight={props.minHeight} />;
   }
 
   return (
     <>
       <div className="relative">
-        <MapCanvas {...props} />
+        <MapCanvas {...props} token={token} />
 
         {props.showExpand !== false && (
           <button
@@ -174,7 +190,7 @@ export default function InteractiveWorldMap(props: InteractiveWorldMapProps) {
                   </button>
                 </div>
                 <div className="min-h-0 flex-1">
-                  <MapCanvas {...props} expanded showExpand={false} fitToMarkers />
+                  <MapCanvas {...props} token={token} expanded showExpand={false} fitToMarkers />
                 </div>
                 {props.footer && (
                   <div className="mt-4 border-t border-line pt-4">{props.footer}</div>

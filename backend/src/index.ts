@@ -13,6 +13,7 @@ import { simulationsRouter } from "./routes/simulations.js";
 import { marketMapRouter } from "./routes/marketMap.js";
 import { agentsRouter } from "./routes/agents.js";
 import { agentChatRouter } from "./routes/agentChat.js";
+import { configRouter } from "./routes/config.js";
 import { llmClient } from "./ai/llmClient.js";
 import { getAgentRulesSummary } from "./ai/agentRules.js";
 
@@ -44,6 +45,7 @@ app.use("/api/simulations", simulationsRouter);
 app.use("/api/market-map", marketMapRouter);
 app.use("/api/agents", agentsRouter);
 app.use("/api/agent", agentChatRouter);
+app.use("/api/config", configRouter);
 
 await connectDb();
 

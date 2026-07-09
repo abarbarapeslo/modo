@@ -9,41 +9,28 @@ export default function MissingApiKeyFallback({ minHeight = 340 }: { minHeight?:
       </span>
       <p className="text-sm font-medium text-ink">Mapbox não configurado</p>
       <p className="mt-2 max-w-md text-xs leading-relaxed text-ink-mute">
-        Crie uma conta gratuita no Mapbox (50.000 carregamentos/mês) e adicione o token
-        em <code className="text-ink-soft">modo/.env</code>:
+        O token fica apenas no servidor. Adicione no <code className="text-ink-soft">modo/.env</code>:
       </p>
       <pre className="mt-4 w-full max-w-md overflow-x-auto rounded-lg border border-line bg-white px-4 py-3 text-left text-[11px] leading-relaxed text-ink-soft">
-        VITE_MAPBOX_ACCESS_TOKEN=pk.eyJ...
+        MAPBOX_ACCESS_TOKEN=seu-token-aqui
       </pre>
       <ol className="mt-4 max-w-md space-y-2 text-left text-[11px] leading-relaxed text-ink-mute">
         <li>
-          1. Cadastre-se em{" "}
-          <a
-            href="https://account.mapbox.com/auth/signup/"
-            target="_blank"
-            rel="noreferrer"
-            className="text-info-ink underline hover:text-ink"
-          >
-            mapbox.com
-          </a>{" "}
-          (grátis)
-        </li>
-        <li>
-          2. Em{" "}
+          1. Obtenha um token em{" "}
           <a
             href="https://account.mapbox.com/access-tokens/"
             target="_blank"
             rel="noreferrer"
             className="text-info-ink underline hover:text-ink"
           >
-            Access Tokens
+            mapbox.com/access-tokens
           </a>
-          , copie o <strong className="font-medium text-ink-soft">Default public token</strong>
         </li>
         <li>
-          3. Cole em <code className="text-ink-soft">VITE_MAPBOX_ACCESS_TOKEN</code>
+          2. Cole em <code className="text-ink-soft">MAPBOX_ACCESS_TOKEN</code> (sem prefixo{" "}
+          <code className="text-ink-soft">VITE_</code>)
         </li>
-        <li>4. Reinicie o frontend (<code className="text-ink-soft">npm run dev</code>)</li>
+        <li>3. Reinicie o backend e o frontend</li>
       </ol>
     </div>
   );
